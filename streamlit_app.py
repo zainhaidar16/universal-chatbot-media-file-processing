@@ -36,7 +36,7 @@ def get_llm_info():
     return model, temp, topp, max_tokens
 
 def handle_pdf_files(uploaded_files, model, temperature, top_p, max_tokens):
-    path_to_files = './'  # Adjust the path if needed
+    path_to_files = './data'  # Adjust the path if needed
     merger = PdfMerger()
 
     for file in uploaded_files:
@@ -72,7 +72,7 @@ def handle_pdf_files(uploaded_files, model, temperature, top_p, max_tokens):
 def handle_media_files(media_type, model, temperature, top_p, max_tokens):
     file = st.file_uploader(f"Upload your {media_type.lower()} file")
     if file:
-        path = './'  # Adjust the path if needed
+        path = './media'  # Adjust the path if needed
         file_path = os.path.join(path, file.name)
         with open(file_path, "wb") as f:
             f.write(file.getbuffer())
