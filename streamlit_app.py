@@ -103,6 +103,9 @@ def main():
     media_type = get_type_of_media()
     model, temperature, top_p, max_tokens = get_llm_info()
 
+    # Ensure vertexai.init() is called with the correct project_id
+    vertexai.init(project="real-time-rag", location="us-central1")
+
     if media_type == "PDF files":
         uploaded_files = st.file_uploader("Choose 1 or more files", accept_multiple_files=True)
         if uploaded_files:
@@ -111,8 +114,9 @@ def main():
         handle_media_files(media_type, model, temperature, top_p, max_tokens)
 
 if __name__ == '__main__':
-    project_id = os.environ.get('GOOG_PROJECT')
     GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY_NEW')
-    genai.configure(api_key=GOOGLE_API_KEY)
-    vertexai.init(project=project_id, location="us-central1")
-    main()
+    if not GOOGLE_API_KEY:
+        st.error("Google API key not found. Please set the 'GOOGLE_API_KEY_NEW' environment variable.")
+    else:
+        genai.configure(api_key=GOOGLE_API_KEY)
+        main()
