@@ -7,16 +7,19 @@ import google.generativeai as genai
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
 from pypdf import PdfReader, PdfWriter, PdfMerger
-from google.auth import credentials
+from google.auth import load_credentials_from_file
 
 # Path to your credentials file
-CREDENTIALS_PATH = './cred.json'
+CREDENTIALS_PATH = 'cred.json'
 
-# Initialize Google Cloud Vertex AI with the credentials file
-vertexai.init(project='real-time-rag', location='us-central1', credentials=CREDENTIALS_PATH)
+# Load credentials from the file
+credentials, project = load_credentials_from_file(CREDENTIALS_PATH)
+
+# Initialize Google Cloud Vertex AI with the credentials
+vertexai.init(project=project, location='us-central1', credentials=credentials)
 
 def page_setup():
-    st.header("Chat with different types of media/files!", anchor=False, divider="blue")
+    st.header("Universal Chatbot for Media File Processing", anchor=False, divider="blue")
     hide_menu_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -47,8 +50,10 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
     path_to_files = './data/'
     if not os.path.exists(path_to_files):
         os.makedirs(path_to_files)
-    
+
+    # Create a PdfMerger object
     merger = PdfMerger()
+
     for file in uploaded_files:
         file_name = file.name
         file_path = os.path.join(path_to_files, file_name)
@@ -59,10 +64,10 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
     merged_file = os.path.join(path_to_files, "merged_all_pages.pdf")
     merger.write(merged_file)
     merger.close()
-    
-    with open(merged_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    
+
+    with open(merged_file, "rb") as pdf_file:
+        encoded_string = base64.b64encode(pdf_file.read()).decode()
+
     file_1 = Part.from_data(
         mime_type="application/pdf",
         data=base64.b64decode(encoded_string)
@@ -73,6 +78,7 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
         "top_p": top_p,
         "max_output_tokens": max_tokens,
     }
+
     try:
         gen_model = GenerativeModel(model_name=model_name, generation_config=generation_config)
         st.write(f"Total tokens submitted: {gen_model.count_tokens(file_1)}")
