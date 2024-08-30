@@ -166,3 +166,4 @@ cython_debug/
 # Ignore PDF and media folders
 /data/
 /media/
+cred.json
