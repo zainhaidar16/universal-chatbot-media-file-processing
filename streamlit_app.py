@@ -3,6 +3,7 @@ import google.generativeai as genai
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
 from pypdf import PdfMerger
+from dotenv import load_dotenv
 import os
 import time
 import base64
@@ -114,9 +115,9 @@ def main():
         handle_media_files(media_type, model, temperature, top_p, max_tokens)
 
 if __name__ == '__main__':
-    GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY_NEW')
+    GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
     if not GOOGLE_API_KEY:
-        st.error("Google API key not found. Please set the 'GOOGLE_API_KEY_NEW' environment variable.")
+        st.error("Google API key not found. Please set the 'GOOGLE_API_KEY' environment variable.")
     else:
         genai.configure(api_key=GOOGLE_API_KEY)
         main()
