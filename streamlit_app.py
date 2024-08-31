@@ -34,7 +34,7 @@ vertexai.init(project=project, location='us-central1', credentials=credentials)
 st.markdown("""
     <style>
     .stApp {
-        background-color: #fff1f2;
+        background-color: #ffffff;
         color: #333;
         font-family: 'Arial', sans-serif;
     }
@@ -55,8 +55,9 @@ st.markdown("""
     .dark-header {
         color: #e11d48; /* Dark color for the header */
     }
-    .dark-subheader {
-        color: #e11d48; /* Dark color for the subheader to match the header */
+    .subheader {
+        color: #e11d48; /* Match subheader color with header */
+        font-weight: bold;
     }
     .stSidebar .sidebar-content {
         background-color: #f7f7f7;
@@ -111,7 +112,7 @@ st.markdown("""
 # Function to set up the page with a dark header
 def page_setup():
     st.markdown("<h1 class='dark-header'>🧠 Universal File Interaction Chatbot</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 class='dark-subheader'>📂 Interact with your files below</h2>", unsafe_allow_html=True)
+    st.markdown("Upload your files and interact with them using the chatbot.")
 
 # Sidebar for selecting the type of media
 def get_typeofmedia():
@@ -135,7 +136,7 @@ def get_llminfo():
 
 # Function to handle PDF files
 def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens):
-    st.subheader("📄 PDF File Processing")
+    st.markdown("<h2 class='subheader'>📄 PDF File Processing</h2>", unsafe_allow_html=True)
     st.write("You can upload multiple PDF files. The files will be merged and processed together.")
     
     path_to_files = './data/'
@@ -182,7 +183,7 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
 
 # Function to handle image files
 def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
-    st.subheader("🖼️ Image File Processing")
+    st.markdown("<h2 class='subheader'>🖼️ Image File Processing</h2>", unsafe_allow_html=True)
     if image_file:
         path_to_files = './media/'
         if not os.path.exists(path_to_files):
@@ -216,7 +217,7 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
 
 # Function to handle video files
 def handle_video_files(video_file, model_name):
-    st.subheader("🎥 Video File Processing")
+    st.markdown("<h2 class='subheader'>🎥 Video File Processing</h2>", unsafe_allow_html=True)
     if video_file:
         path_to_files = './media/'
         if not os.path.exists(path_to_files):
@@ -246,7 +247,7 @@ def handle_video_files(video_file, model_name):
 
 # Function to handle audio files
 def handle_audio_files(audio_file, model_name):
-    st.subheader("🎵 Audio File Processing")
+    st.markdown("<h2 class='subheader'>🎵 Audio File Processing</h2>", unsafe_allow_html=True)
     if audio_file:
         path_to_files = './media/'
         if not os.path.exists(path_to_files):
