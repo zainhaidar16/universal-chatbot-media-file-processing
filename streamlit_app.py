@@ -53,7 +53,7 @@ st.markdown("""
         font-weight: 700;
     }
     .dark-header, .subheader {
-        color: #e11d48; /* Matching the header color */
+        color: #e11d48; /* Match the header color */
         font-weight: 700;
     }
     .stSidebar .sidebar-content {
