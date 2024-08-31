@@ -34,7 +34,7 @@ vertexai.init(project=project, location='us-central1', credentials=credentials)
 st.markdown("""
     <style>
     .stApp {
-        background-color: #fff1f2;
+        background-color: #ffffff;
         color: #333;
         font-family: 'Arial', sans-serif;
     }
@@ -55,6 +55,9 @@ st.markdown("""
     .dark-header, .subheader {
         color: #e11d48; /* Match the header color */
         font-weight: 700;
+    }
+    .chat-header {
+        color: #e11d48; /* Color for the chat header */
     }
     .stSidebar .sidebar-content {
         background-color: #f7f7f7;
@@ -82,6 +85,14 @@ st.markdown("""
         max-height: 400px;
         overflow-y: auto;
         margin-bottom: 20px;
+    }
+    .chat-input {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 10px;
+        background-color: #fff;
+        border-top: 1px solid #ddd;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -270,7 +281,11 @@ def handle_conversation(model_name, temperature, top_p, max_tokens):
 
     display_history()
 
+    # Input for chat message
+    st.markdown("<div class='chat-input'>", unsafe_allow_html=True)
     user_input = st.text_input("Enter your message:", help="Type your message here and press enter to chat with the AI.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
     if user_input:
         st.session_state['history'].append({'text': user_input, 'is_user': True})
 
