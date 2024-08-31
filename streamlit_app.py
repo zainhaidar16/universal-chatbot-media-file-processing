@@ -5,6 +5,7 @@ import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as genai
 import vertexai
+from pypdf import PdfMerger
 from vertexai.generative_models import GenerativeModel, Part
 from google.oauth2.service_account import Credentials
 
