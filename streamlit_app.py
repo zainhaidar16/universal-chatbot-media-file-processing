@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
-from pypdf import PdfMerger
 from google.oauth2.service_account import Credentials
 
 # Load credentials from Streamlit secrets
@@ -109,22 +108,19 @@ def get_llminfo():
 def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens):
     st.subheader("📄 PDF File Processing")
     st.write("You can upload multiple PDF files. The files will be merged and processed together.")
-    
-    path_to_files = './data/'
-    if not os.path.exists(path_to_files):
-        os.makedirs(path_to_files)
 
     # Create a PdfMerger object
     merger = PdfMerger()
 
+    # Save and merge uploaded files
     for file in uploaded_files:
         file_name = file.name
-        file_path = os.path.join(path_to_files, file_name)
+        file_path = f'/tmp/{file_name}'
         with open(file_path, "wb") as f:
             f.write(file.read())
         merger.append(file_path)
 
-    merged_file = os.path.join(path_to_files, "merged_all_pages.pdf")
+    merged_file = '/tmp/merged_all_pages.pdf'
     merger.write(merged_file)
     merger.close()
 
@@ -156,11 +152,7 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
 def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
     st.subheader("🖼️ Image File Processing")
     if image_file:
-        path_to_files = './media/'
-        if not os.path.exists(path_to_files):
-            os.makedirs(path_to_files)
-        
-        file_path = os.path.join(path_to_files, image_file.name)
+        file_path = f'/tmp/{image_file.name}'
         with open(file_path, "wb") as f:
             f.write(image_file.read())
         
@@ -190,11 +182,7 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
 def handle_video_files(video_file, model_name):
     st.subheader("🎥 Video File Processing")
     if video_file:
-        path_to_files = './media/'
-        if not os.path.exists(path_to_files):
-            os.makedirs(path_to_files)
-        
-        file_path = os.path.join(path_to_files, video_file.name)
+        file_path = f'/tmp/{video_file.name}'
         with open(file_path, "wb") as f:
             f.write(video_file.read())
         
@@ -220,11 +208,7 @@ def handle_video_files(video_file, model_name):
 def handle_audio_files(audio_file, model_name):
     st.subheader("🎵 Audio File Processing")
     if audio_file:
-        path_to_files = './media/'
-        if not os.path.exists(path_to_files):
-            os.makedirs(path_to_files)
-        
-        file_path = os.path.join(path_to_files, audio_file.name)
+        file_path = f'/tmp/{audio_file.name}'
         with open(file_path, "wb") as f:
             f.write(audio_file.read())
         
