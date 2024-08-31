@@ -52,12 +52,8 @@ st.markdown("""
         color: #e11d48;
         font-weight: 700;
     }
-    .dark-header, .subheader {
-        color: #e11d48; /* Match the header color */
-        font-weight: 700;
-    }
-    .chat-header {
-        color: #e11d48; /* Color for the chat header */
+    .dark-header {
+        color: #e11d48; /* Dark color for the header */
     }
     .stSidebar .sidebar-content {
         background-color: #f7f7f7;
@@ -81,18 +77,30 @@ st.markdown("""
         background-color: #fda4af;
         color: #333;
     }
-    .chat-container {
-        max-height: 400px;
-        overflow-y: auto;
-        margin-bottom: 60px; /* Add margin for space above the chat input */
-    }
     .chat-input {
         position: fixed;
         bottom: 0;
         width: 100%;
-        padding: 10px;
-        background-color: #fff;
+        background-color: #fff1f2;
         border-top: 1px solid #ddd;
+        padding: 10px;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    }
+    .chat-input textarea {
+        width: calc(100% - 90px);
+        height: 40px;
+        border-radius: 5px;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    .chat-input button {
+        width: 80px;
+        height: 40px;
+        background-color: #f43f5e;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -100,13 +108,13 @@ st.markdown("""
 # Function to set up the page with a dark header
 def page_setup():
     st.markdown("<h1 class='dark-header'>🧠 Universal Chatbot for Media File Processing</h1>", unsafe_allow_html=True)
-    st.markdown("This application allows you to upload and process various media files using advanced AI models and also chat with the AI. Please select the media type from the sidebar to get started.")
+    st.markdown("This application allows you to upload and process various media files using advanced AI models. Please select the media type from the sidebar to get started.")
 
 # Sidebar for selecting the type of media
 def get_typeofmedia():
     st.sidebar.header("Select type of Media")
     media_type = st.sidebar.radio("Choose one:",
-                                  ("PDF files", "Images", "Video, mp4 file", "Audio files", "Chat with AI"))
+                                  ("PDF files", "Images", "Video, mp4 file", "Audio files"))
     return media_type
 
 # Sidebar for LLM configuration options
@@ -189,7 +197,7 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
             if image_file.state.name == "FAILED":
                 raise ValueError(image_file.state.name)
             
-            prompt2 = st.text_input("Enter your prompt for the image.", help="Describe what you want the AI to do with the image.")
+            prompt2 = st.text_input("Enter your prompt about the image.", help="Describe what you want the AI to do with the image.")
             if prompt2:
                 generation_config = {
                     "temperature": temperature,
@@ -223,7 +231,7 @@ def handle_video_files(video_file, model_name):
             if video_file.state.name == "FAILED":
                 raise ValueError(video_file.state.name)
             
-            prompt3 = st.text_input("Enter your prompt for the video.", help="Describe what you want the AI to do with the video.")
+            prompt3 = st.text_input("Enter your prompt about the video.", help="Describe what you want the AI to do with the video.")
             if prompt3:
                 model = genai.GenerativeModel(model_name=model_name)
                 st.write("Making LLM inference request...")
@@ -253,7 +261,7 @@ def handle_audio_files(audio_file, model_name):
             if audio_file.state.name == "FAILED":
                 raise ValueError(audio_file.state.name)
             
-            prompt3 = st.text_input("Enter your prompt for the audio.", help="Describe what you want the AI to do with the audio.")
+            prompt3 = st.text_input("Enter your prompt about the audio.", help="Describe what you want the AI to do with the audio.")
             if prompt3:
                 model = genai.GenerativeModel(model_name=model_name)
                 response = model.generate_content([audio_file, prompt3], request_options={"timeout": 600})
@@ -262,56 +270,49 @@ def handle_audio_files(audio_file, model_name):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-# Function to handle general conversation
-def handle_conversation(model_name, temperature, top_p, max_tokens):
-    st.subheader("💬 General Conversation")
-    
-    # Container for chat history
-    if 'history' not in st.session_state:
-        st.session_state['history'] = []
-
-    def display_history():
-        st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
-        for message in st.session_state['history']:
-            if message['is_user']:
-                st.markdown(f"<div class='user-bubble'>{message['text']}</div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div class='chat-bubble'>{message['text']}</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    display_history()
-
-    # Input for chat message
-    st.markdown("<div class='chat-input'>", unsafe_allow_html=True)
-    user_input = st.text_input("Enter your message:", help="Type your message here and press enter to chat with the AI.")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    if user_input:
-        st.session_state['history'].append({'text': user_input, 'is_user': True})
-
-        # Generate response from AI
-        generation_config = {
-            "temperature": temperature,
-            "top_p": top_p,
-            "max_output_tokens": max_tokens,
-        }
-        try:
-            gen_model = GenerativeModel(model_name=model_name, generation_config=generation_config)
-            response = gen_model.generate_content([user_input])
-            st.session_state['history'].append({'text': response.text, 'is_user': False})
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-
-        display_history()
-
 # Main function to run the app
 def main():
     page_setup()
     media_type = get_typeofmedia()
     model_name, temperature, top_p, max_tokens = get_llminfo()
-    
+
+    # Display chat history
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    st.write("### 💬 General Conversation")
+    for message in st.session_state.chat_history:
+        if message['role'] == 'user':
+            st.markdown(f"<div class='user-bubble'>{message['content']}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='chat-bubble'>{message['content']}</div>", unsafe_allow_html=True)
+
+    # Input field for chat messages
+    with st.form(key='chat_form', clear_on_submit=True):
+        user_message = st.text_area("Type your message:", height=40)
+        submit_button = st.form_submit_button(label='Send')
+        
+        if submit_button and user_message:
+            st.session_state.chat_history.append({'role': 'user', 'content': user_message})
+            st.write("Processing...")
+
+            try:
+                gen_model = GenerativeModel(model_name=model_name, generation_config={
+                    "temperature": temperature,
+                    "top_p": top_p,
+                    "max_output_tokens": max_tokens,
+                })
+                response = gen_model.generate_content([user_message])
+                ai_message = response.text
+
+                st.session_state.chat_history.append({'role': 'ai', 'content': ai_message})
+                st.experimental_rerun()
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+
+    # Handle media uploads and interactions
     if media_type == "PDF files":
-        uploaded_files = st.file_uploader("Choose 1 or more files", accept_multiple_files=True)
+        uploaded_files = st.file_uploader("Choose 1 or more PDF files", accept_multiple_files=True)
         if uploaded_files:
             handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
     
@@ -329,9 +330,6 @@ def main():
         audio_file = st.file_uploader("Upload your audio")
         if audio_file:
             handle_audio_files(audio_file, model_name)
-
-    elif media_type == "Chat with AI":
-        handle_conversation(model_name, temperature, top_p, max_tokens)
 
 if __name__ == '__main__':
     main()
