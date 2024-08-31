@@ -7,7 +7,7 @@ import google.generativeai as genai
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
 from google.oauth2.service_account import Credentials
-from pypdf import PdfMerger  # Updated import for PdfMerger
+from pypdf import PdfMerger 
 
 # Load credentials from Streamlit secrets
 def load_credentials():
