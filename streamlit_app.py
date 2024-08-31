@@ -5,9 +5,9 @@ import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as genai
 import vertexai
-from pypdf import PdfMerger
 from vertexai.generative_models import GenerativeModel, Part
 from google.oauth2.service_account import Credentials
+from PyPDF2 import PdfMerger  # Updated import for PdfMerger
 
 # Load credentials from Streamlit secrets
 def load_credentials():
@@ -77,6 +77,11 @@ st.markdown("""
         background-color: #fda4af;
         color: #333;
     }
+    .stSubheader {
+        color: #e11d48; /* Match subheader color with header */
+        font-weight: 600;
+        font-size: 1.5em;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -107,7 +112,7 @@ def get_llminfo():
 
 # Function to handle PDF files
 def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens):
-    st.subheader("📄 PDF File Processing")
+    st.markdown("<h2 class='stSubheader'>📄 PDF File Processing</h2>", unsafe_allow_html=True)
     st.write("You can upload multiple PDF files. The files will be merged and processed together.")
 
     # Create a PdfMerger object
@@ -151,7 +156,7 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
 
 # Function to handle image files
 def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
-    st.subheader("🖼️ Image File Processing")
+    st.markdown("<h2 class='stSubheader'>🖼️ Image File Processing</h2>", unsafe_allow_html=True)
     if image_file:
         file_path = f'/tmp/{image_file.name}'
         with open(file_path, "wb") as f:
@@ -181,7 +186,7 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
 
 # Function to handle video files
 def handle_video_files(video_file, model_name):
-    st.subheader("🎥 Video File Processing")
+    st.markdown("<h2 class='stSubheader'>🎥 Video File Processing</h2>", unsafe_allow_html=True)
     if video_file:
         file_path = f'/tmp/{video_file.name}'
         with open(file_path, "wb") as f:
@@ -207,7 +212,7 @@ def handle_video_files(video_file, model_name):
 
 # Function to handle audio files
 def handle_audio_files(audio_file, model_name):
-    st.subheader("🎵 Audio File Processing")
+    st.markdown("<h2 class='stSubheader'>🎵 Audio File Processing</h2>", unsafe_allow_html=True)
     if audio_file:
         file_path = f'/tmp/{audio_file.name}'
         with open(file_path, "wb") as f:
