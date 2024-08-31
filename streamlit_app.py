@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
-from pypdf import PdfReader, PdfWriter, PdfMerger
+from pypdf import PdfMerger
 from google.auth import load_credentials_from_file
 
 # Path to your credentials file
@@ -18,35 +18,99 @@ credentials, project = load_credentials_from_file(CREDENTIALS_PATH)
 # Initialize Google Cloud Vertex AI with the credentials
 vertexai.init(project=project, location='us-central1', credentials=credentials)
 
-def page_setup():
-    st.header("Universal Chatbot for Media File Processing", anchor=False, divider="blue")
-    hide_menu_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            </style>
-            """
-    st.markdown(hide_menu_style, unsafe_allow_html=True)
+# Custom CSS for styling
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #ffffff; /* white */
+        color: #333;
+        font-family: 'Arial', sans-serif;
+        padding: 20px;
+    }
+    .stButton>button {
+        background-color: #f43f5e; /* rose-500 */
+        color: white;
+        border-radius: 5px;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .stButton>button:hover {
+        background-color: #e11d48; /* rose-600 */
+    }
+    .stHeader {
+        color: #be123c; /* rose-700 */
+        font-weight: 700;
+        border-bottom: 2px solid #f43f5e; /* rose-500 */
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    .dark-header {
+        color: #9f1239; /* rose-800 */
+    }
+    .stSidebar .sidebar-content {
+        background-color: #ffe4e6; /* rose-100 */
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .stFileUploader {
+        background-color: #fda4af; /* rose-300 */
+        border: 2px dashed #f43f5e; /* rose-500 */
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+    h2, h3 {
+        color: #e11d48; /* rose-600 */
+    }
+    .chat-bubble {
+        background-color: #fb7185; /* rose-400 */
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+    .user-bubble {
+        background-color: #fda4af; /* rose-300 */
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        text-align: right;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
+# Function to set up the page with a dark header
+def page_setup():
+    st.markdown("<h1 class='dark-header'>🧠 Universal Chatbot for Media File Processing</h1>", unsafe_allow_html=True)
+    st.markdown("This application allows you to upload and process various media files using advanced AI models. Please select the media type from the sidebar to get started.")
+    
+# Sidebar for selecting the type of media
 def get_typeofmedia():
-    st.sidebar.header("Select type of Media", divider='orange')
+    st.sidebar.header("Select Type of Media")
     media_type = st.sidebar.radio("Choose one:",
                                   ("PDF files", "Images", "Video, mp4 file", "Audio files"))
     return media_type
 
+# Sidebar for LLM configuration options
 def get_llminfo():
-    st.sidebar.header("Options", divider='rainbow')
-    tip1 = "Select a model you want to use."
+    st.sidebar.header("LLM Configuration")
+    st.sidebar.markdown("Configure the language model settings to customize the AI's responses.")
+    
     model_name = st.sidebar.radio("Choose LLM:",
-                                  ("gemini-1.5-flash", "gemini-1.5-pro"), help=tip1)
-    tip2 = "Lower temperatures are good for prompts that require a less open-ended or creative response, while higher temperatures can lead to more diverse or creative results. A temperature of 0 means that the highest probability tokens are always selected."
-    temp = st.sidebar.slider("Temperature:", min_value=0.0, max_value=2.0, value=1.0, step=0.25, help=tip2)
-    tip3 = "Used for nucleus sampling. Specify a lower value for less random responses and a higher value for more random responses."
-    topp = st.sidebar.slider("Top P:", min_value=0.0, max_value=1.0, value=0.94, step=0.01, help=tip3)
-    tip4 = "Number of response tokens, 8194 is limit."
-    maxtokens = st.sidebar.slider("Maximum Tokens:", min_value=100, max_value=5000, value=2000, step=100, help=tip4)
+                                  ("gemini-1.5-flash", "gemini-1.5-pro"))
+    temp = st.sidebar.slider("Temperature:", min_value=0.0, max_value=2.0, value=1.0, step=0.25)
+    topp = st.sidebar.slider("Top P:", min_value=0.0, max_value=1.0, value=0.94, step=0.01)
+    maxtokens = st.sidebar.slider("Maximum Tokens:", min_value=100, max_value=5000, value=2000, step=100)
+    
     return model_name, temp, topp, maxtokens
 
+# Function to handle PDF files
 def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens):
+    st.subheader("📄 PDF File Processing")
+    st.write("You can upload multiple PDF files. The files will be merged and processed together.")
+    
     path_to_files = './data/'
     if not os.path.exists(path_to_files):
         os.makedirs(path_to_files)
@@ -82,14 +146,16 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
     try:
         gen_model = GenerativeModel(model_name=model_name, generation_config=generation_config)
         st.write(f"Total tokens submitted: {gen_model.count_tokens(file_1)}")
-        question = st.text_input("Enter your question and hit return.")
+        question = st.text_input("Enter your question and hit return.", help="Ask any question about the content of the PDF file.")
         if question:
             response = gen_model.generate_content([question, file_1])
             st.markdown(response.text)
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
+# Function to handle image files
 def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
+    st.subheader("🖼️ Image File Processing")
     if image_file:
         path_to_files = './media/'
         if not os.path.exists(path_to_files):
@@ -107,7 +173,7 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
             if image_file.state.name == "FAILED":
                 raise ValueError(image_file.state.name)
             
-            prompt2 = st.text_input("Enter your prompt.")
+            prompt2 = st.text_input("Enter your prompt.", help="Describe what you want the AI to do with the image.")
             if prompt2:
                 generation_config = {
                     "temperature": temperature,
@@ -121,7 +187,9 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
+# Function to handle video files
 def handle_video_files(video_file, model_name):
+    st.subheader("🎥 Video File Processing")
     if video_file:
         path_to_files = './media/'
         if not os.path.exists(path_to_files):
@@ -139,7 +207,7 @@ def handle_video_files(video_file, model_name):
             if video_file.state.name == "FAILED":
                 raise ValueError(video_file.state.name)
             
-            prompt3 = st.text_input("Enter your prompt.")
+            prompt3 = st.text_input("Enter your prompt.", help="Describe what you want the AI to do with the video.")
             if prompt3:
                 model = genai.GenerativeModel(model_name=model_name)
                 st.write("Making LLM inference request...")
@@ -149,7 +217,9 @@ def handle_video_files(video_file, model_name):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
+# Function to handle audio files
 def handle_audio_files(audio_file, model_name):
+    st.subheader("🎵 Audio File Processing")
     if audio_file:
         path_to_files = './media/'
         if not os.path.exists(path_to_files):
@@ -167,7 +237,7 @@ def handle_audio_files(audio_file, model_name):
             if audio_file.state.name == "FAILED":
                 raise ValueError(audio_file.state.name)
             
-            prompt3 = st.text_input("Enter your prompt.")
+            prompt3 = st.text_input("Enter your prompt.", help="Describe what you want the AI to do with the audio.")
             if prompt3:
                 model = genai.GenerativeModel(model_name=model_name)
                 response = model.generate_content([audio_file, prompt3], request_options={"timeout": 600})
@@ -176,6 +246,7 @@ def handle_audio_files(audio_file, model_name):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
+# Main function to run the app
 def main():
     page_setup()
     media_type = get_typeofmedia()
