@@ -34,7 +34,7 @@ vertexai.init(project=project, location='us-central1', credentials=credentials)
 st.markdown("""
     <style>
     .stApp {
-        background-color: #ffffff;
+        background-color: #fff1f2;
         color: #333;
         font-family: 'Arial', sans-serif;
     }
@@ -84,7 +84,7 @@ st.markdown("""
     .chat-container {
         max-height: 400px;
         overflow-y: auto;
-        margin-bottom: 20px;
+        margin-bottom: 60px; /* Add margin for space above the chat input */
     }
     .chat-input {
         position: fixed;
