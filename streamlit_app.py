@@ -55,6 +55,9 @@ st.markdown("""
     .dark-header {
         color: #e11d48; /* Dark color for the header */
     }
+    .dark-subheader {
+        color: #e11d48; /* Dark color for the subheader to match the header */
+    }
     .stSidebar .sidebar-content {
         background-color: #f7f7f7;
     }
@@ -108,7 +111,7 @@ st.markdown("""
 # Function to set up the page with a dark header
 def page_setup():
     st.markdown("<h1 class='dark-header'>🧠 Universal File Interaction Chatbot</h1>", unsafe_allow_html=True)
-    st.markdown("Upload your files and interact with them using the chatbot.")
+    st.markdown("<h2 class='dark-subheader'>📂 Interact with your files below</h2>", unsafe_allow_html=True)
 
 # Sidebar for selecting the type of media
 def get_typeofmedia():
