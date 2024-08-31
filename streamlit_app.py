@@ -107,8 +107,8 @@ st.markdown("""
 
 # Function to set up the page with a dark header
 def page_setup():
-    st.markdown("<h1 class='dark-header'>🧠 Universal Chatbot for Media File Processing</h1>", unsafe_allow_html=True)
-    st.markdown("This application allows you to upload and process various media files using advanced AI models. Please select the media type from the sidebar to get started.")
+    st.markdown("<h1 class='dark-header'>🧠 Universal File Interaction Chatbot</h1>", unsafe_allow_html=True)
+    st.markdown("Upload your files and interact with them using the chatbot.")
 
 # Sidebar for selecting the type of media
 def get_typeofmedia():
@@ -170,7 +170,7 @@ def handle_pdf_files(uploaded_files, model_name, temperature, top_p, max_tokens)
     try:
         gen_model = GenerativeModel(model_name=model_name, generation_config=generation_config)
         st.write(f"Total tokens submitted: {gen_model.count_tokens(file_1)}")
-        question = st.text_input("Enter your question about the PDF and hit return.", help="Ask any question about the content of the PDF file.")
+        question = st.text_input("Ask about the content of the PDF:", help="Enter your question.")
         if question:
             response = gen_model.generate_content([question, file_1])
             st.markdown(response.text)
@@ -197,7 +197,7 @@ def handle_image_files(image_file, model_name, temperature, top_p, max_tokens):
             if image_file.state.name == "FAILED":
                 raise ValueError(image_file.state.name)
             
-            prompt2 = st.text_input("Enter your prompt about the image.", help="Describe what you want the AI to do with the image.")
+            prompt2 = st.text_input("Describe what you want to know about the image:", help="Enter your prompt.")
             if prompt2:
                 generation_config = {
                     "temperature": temperature,
@@ -231,7 +231,7 @@ def handle_video_files(video_file, model_name):
             if video_file.state.name == "FAILED":
                 raise ValueError(video_file.state.name)
             
-            prompt3 = st.text_input("Enter your prompt about the video.", help="Describe what you want the AI to do with the video.")
+            prompt3 = st.text_input("Describe what you want to know about the video:", help="Enter your prompt.")
             if prompt3:
                 model = genai.GenerativeModel(model_name=model_name)
                 st.write("Making LLM inference request...")
@@ -261,7 +261,7 @@ def handle_audio_files(audio_file, model_name):
             if audio_file.state.name == "FAILED":
                 raise ValueError(audio_file.state.name)
             
-            prompt3 = st.text_input("Enter your prompt about the audio.", help="Describe what you want the AI to do with the audio.")
+            prompt3 = st.text_input("Describe what you want to know about the audio:", help="Enter your prompt.")
             if prompt3:
                 model = genai.GenerativeModel(model_name=model_name)
                 response = model.generate_content([audio_file, prompt3], request_options={"timeout": 600})
@@ -275,41 +275,7 @@ def main():
     page_setup()
     media_type = get_typeofmedia()
     model_name, temperature, top_p, max_tokens = get_llminfo()
-
-    # Display chat history
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-
-    st.write("### 💬 General Conversation")
-    for message in st.session_state.chat_history:
-        if message['role'] == 'user':
-            st.markdown(f"<div class='user-bubble'>{message['content']}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div class='chat-bubble'>{message['content']}</div>", unsafe_allow_html=True)
-
-    # Input field for chat messages
-    with st.form(key='chat_form', clear_on_submit=True):
-        user_message = st.text_area("Type your message:", height=40)
-        submit_button = st.form_submit_button(label='Send')
-        
-        if submit_button and user_message:
-            st.session_state.chat_history.append({'role': 'user', 'content': user_message})
-            st.write("Processing...")
-
-            try:
-                gen_model = GenerativeModel(model_name=model_name, generation_config={
-                    "temperature": temperature,
-                    "top_p": top_p,
-                    "max_output_tokens": max_tokens,
-                })
-                response = gen_model.generate_content([user_message])
-                ai_message = response.text
-
-                st.session_state.chat_history.append({'role': 'ai', 'content': ai_message})
-                st.experimental_rerun()
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-
+    
     # Handle media uploads and interactions
     if media_type == "PDF files":
         uploaded_files = st.file_uploader("Choose 1 or more PDF files", accept_multiple_files=True)
